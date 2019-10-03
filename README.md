@@ -4,4 +4,4 @@ This repository contains a software implementation of the joint spatial quantile
 
 A vignette is provided to illustrate how to perform model fitting, model comparison and prediction.
 
-The simulation results in the paper can be reproduced using the files in the simulation folder. Each folder contains a readme document providing details on the files in the folder.
+The simulation results in the paper can be reproduced using the files in the simulation folder. Each folder contains a readme document providing details of the files.
