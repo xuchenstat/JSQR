@@ -1,0 +1,5 @@
+This folder contains the C code and R wrapper of JSQR with t copula process.
+
+jsqrtp.c:    MCMC implementation of the algorithm
+jsqrtp.R:    Main function of the algorithm  
+utility.R:   Utility functions

@@ -1,0 +1,5 @@
+This folder contains the C code and R wrapper of JSQR with Gaussian copula process.
+
+jsqrgp.c:    MCMC implementation of the algorithm
+jsqrgp.R:    Main function of the algorithm  
+utility.R:   Utility functions

@@ -1,0 +1,3 @@
+jqr_waic_gp.R          - Compute WAIC for JQR under scenario where true generating process is GP
+jsqrgp_waic_gp.R       - Compute WAIC for JSQR-GP under scenario where true generating process is GP
+jsqrtp_waic_gp.R       - Compute WAIC for JSQR-TP under scenario where true generating process is GP

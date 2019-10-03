@@ -1,0 +1,5 @@
+This folder contains all R files for conducting simulation studies in Section 6.3. 
+
+modelfit: Contain R files for model fitting under three different scenarios
+waic:     Contain R files for calculating WAIC for three different models under three scenarios
+pred:     Contain R files for computing predicted conditional quantiles for three different models under three scenarios

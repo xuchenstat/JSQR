@@ -1,0 +1,3 @@
+jqr_pred_tp.R       - Prediction of conditional quantiles with JQR under scenario where true generating process is TP (Figure 4, panel 3)
+jsqrgp_pred_tp.R    - Prediction of conditional quantiles with JSQR-GP under scenario where true generating process is TP (Figure 4, panel 3,4)
+jsqrtp_pred_tp.R    - Prediction of conditional quantiles with JSQR-TP under scenario where true generating process is TP (Figure 4, panel 3,4)

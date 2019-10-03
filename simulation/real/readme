@@ -1,0 +1,18 @@
+This folder contains files for conducting PM 2.5 concentration data analysis in Section 7.
+
+
+pm.csv            - PM 2.5 concentration data file, obtained from 
+                    https://www.stat.berkeley.edu/users/paciorek/code/ejs/
+
+pm_ald.R          - ALDQR model fit for PM 2.5 data in Section 7.1
+pm_alp.R          - ALPQR model fit for PM 2.5 data in Section 7.1
+pm_jqr.R          - JQR model fit for PM 2.5 data in Section 7.1
+pm_jsqr.R         - JSQR-GP model fit for PM 2.5 data in Section 7.1
+pm_jsqrtp.R       - JSQR-TP model fit for PM 2.5 data in Section 7.1
+pm_kb.R           - KB model fit for PM 2.5 data in Section 7.1
+
+pm_pred.R         - Estimation and prediction of conditional quantiles for all 
+                    models except JSQR-TP (results presented in Figure 6)
+pm_pred_jsqrtp.R  - Estimation and prediction of conditional quantiles for JSQR-TP
+
+pm_bsre.R         - BSRE model fit (results presented in Figure 7)

@@ -1,0 +1,3 @@
+jqr_ind.R       - JQR model fit under independent scenario
+jsqrgp_ind.R    - JSQR-GP model fit under independent scenario
+jsqrtp_ind.R    - JSQR-TP model fit under independent scenario

@@ -1,0 +1,194 @@
+---
+title: "A brief vignette on joint quantile regression for spatial data"
+output: pdf_document
+author: Xu Chen
+bibliography: sample.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1 \hspace{2mm} $\text{PM}_{2.5}$ concentration dataset
+
+The dataset\footnote{The dataset is available at \url{https://www.stat.berkeley.edu/users/paciorek/code/ejs/}.} [@paciorek2013spatial] contains averaged daily $\text{PM}_{2.5}$ concentrations from 2001 to 2002 monitored at 339 stations in the northeastern United States. We load the data and split it into a training set ($80\%$) and a test set ($20\%$).
+
+```{r}
+# load data
+pm <- read.csv('simulation/real/pm.csv')
+
+# assign numbers of observations in training set and test set
+n <- nrow(pm)
+n.train <- 270
+n.test <- n - n.train 
+
+# random split the dataset into a training set and a test set
+set.seed(123)
+train.ix <- sample(n, n.train)
+test.ix <- (1:n)[-train.ix]
+```
+
+Many geographical and meteorological covariates are recorded. For illustration, the following 5 covariates are included in our analysis: (i) logarithm of population density at county level (\textsf{LCYPOP00}), (ii) logarithm of distance to A1 class roads (primary roads, typically interstates) (\textsf{LDISTA1}), (iii) proportion of urban land use within 1 kilometer of the station location (\textsf{NCLD\_URB}), (iv) logarithm of PM 2.5 emissions with in a 10 kilometer buffer (\textsf{LS25\_E10}), and, (v) elevation of the station (\textsf{ELEV\_NED}).
+
+```{r}
+# extract response and predictors
+y.train <- pm[train.ix,]$pm
+x.train <- pm[train.ix, c('LCYPOP00', 'LDISTA1', 'NLCD_URB', 'LS25_E10', 'ELEV_NED')]
+
+y.test <- pm[test.ix,]$pm
+x.test <- pm[test.ix, c('LCYPOP00', 'LDISTA1', 'NLCD_URB', 'LS25_E10', 'ELEV_NED')]
+```
+
+We calculate the Euclidean distances between monitoring stations.
+
+```{r}
+# get coordinates of monitoring stations
+coords <- pm[,c('x','y')]
+
+# calculate the Euclidean distances between monitoring stations in the training set
+distance <- as.vector(dist(coords[train.ix,], method = 'euclidean'))
+```
+
+
+# 2 \hspace{2mm} Joint quantile regression analysis of $\text{PM}_{2.5}$ concentration
+
+## Joint spatial quantile regression with Gaussian copula process
+
+We first load the necessary functions for conducting the analysis.
+
+```{r, message=FALSE}
+# load MCMC sampler written in C
+dyn.load('jsqr/jsqrgp/jsqrgp.so')
+
+# load utility functions
+source('jsqr/jsqrgp/utility.R')
+
+# load the main function
+source('jsqr/jsqrgp/jsqrgp.R')
+```
+
+We fit the joint spatial quantile regression (JSQR) model with Mat\'ern correlation function and logistic bsae distribution. The number of discrete values of decay parameter ($\phi$) is set to be 10. The parameter values are initialized according to priors. The MCMC algorithm is run for 20,000 iterations with first 10,000 as burnin. The target acceptance ratio is $15\%$. We monitor the log posterior value every 2,000 iterations.
+
+```{r}
+# fit joint spatial quantile regression model
+jsqrgp.fit <- qrjointgp(x = x.train, y = y.train, par = 'prior', distance = distance,
+                        location = coords[train.ix,], nphi = 10, kernel = 'matern',
+                        acpt.target = 0.15, acpt.hptarget = 0.15, kappa = 2, nsamp = 2e3,
+                        thin = 10, fbase = 'logistic')
+```
+
+After the model fitting, we plot the estimated regression coefficients across quantile levels from 0 to 1. The point estimates (red curve) are given by posterior medians. 95\% credible intervals are also presented.
+
+```{r}
+# plot the regression coefficients across quantile levels from 0 to 1
+coef.qrjointgp(jsqrgp.fit, burn.perc = 0.5, nmc = 5e2, plot = TRUE)
+```
+
+The Watanabe-Akaike information criteria (WAIC) [@watanabe2010asymptotic, @gelman2014understanding] can be calculated as follows.
+
+```{r}
+# calculate two versions of WAIC (the latter one should be more reliable)
+waicgp(jsqrgp.fit, burn.perc = 0.5, nmc = 500)
+```
+
+We then showcase how to perform spatial interpolation with our model.
+
+```{r}
+# the quantile levels at which we examine the prediction performances of the model
+tau.grid <- c(0.01,0.05,seq(0.1,0.9,0.1),0.95,0.99)
+
+# calculate predicted conditional quantiles at specified quantile levels
+qt.pred <- predict.qrjointgp(jsqrgp.fit, x.test = x.test, location.test = coords[test.ix,],
+                             tau.test = tau.grid, burn.perc = 0.5, nmc = 5e2)
+```
+
+The check loss is computed to evaluate the prediction performance of the model.
+
+```{r}
+# specify check loss function
+check.loss <- function(r, tau){return(r*(tau - (r<0)))}
+
+# calculate residuals
+jsqrgp.test.err <- apply(qt.pred, 2, function(u) y.test - u)
+
+# calculate check loss
+jsqrgp.test.loss <- matrix(NA, n.test, length(tau.grid))
+for(i in 1:length(tau.grid)){jsqrgp.test.loss[,i] <- check.loss(jsqrgp.test.err[,i], tau.grid[i])}
+```
+
+
+## Joint spatial quantile regression with $t$ copula process
+
+We could alternatively adopt $t$ copula process to carry out the analysis as follows. The code is similar to that of Gaussian copula process.
+
+```{r, message=FALSE}
+dyn.load('jsqr/jsqrtp/jsqrtp.so')
+source('jsqr/jsqrtp/utility.R')
+source('jsqr/jsqrtp/jsqrtp.R')
+```
+
+Instead of using logistic base distribution, we employ a $t$ base to account for potential heavy tails of response.
+
+```{r}
+jsqrtp.fit <- qrjointtp(x = x.train, y = y.train, par = 'prior', distance = distance,
+                         location = coords[train.ix,], nphi = 10, kernel = 'matern',
+                         acpt.target = 0.15, acpt.hptarget = 0.15, kappa = 2, nsamp = 2e3,
+                         thin = 10, fbase = 't')
+```
+
+The plot of regression coefficients and WAIC are similar to those of the model with Gaussian copula process.
+
+```{r}
+coef.qrjointtp(jsqrtp.fit, burn.perc = 0.5, nmc = 5e2, plot = TRUE)
+```
+
+```{r}
+waictp(jsqrtp.fit, burn.perc = 0.5, nmc = 500)
+```
+
+We also calculate the predicted conditional quantiles given by JSQR with $t$ copula process
+
+```{r}
+qt.pred <- predict.qrjointtp(jsqrtp.fit, x.test = x.test, location.test = coords[test.ix,], 
+                             tau.test = tau.grid, burn.perc = 0.5, nmc = 5e2)
+
+jsqrtp.test.err <- apply(qt.pred, 2, function(u) y.test - u)
+jsqrtp.test.loss <- matrix(NA, n.test, length(tau.grid))
+
+for(i in 1:length(tau.grid)){jsqrtp.test.loss[,i] <- check.loss(jsqrtp.test.err[,i], tau.grid[i])}
+```
+
+## Comparison of prediction performances
+
+We illustrate the prediction performances of JSQR model with Gaussian and $t$ copula processes fitted above, benchmarked by the joint quantile regression (JQR) model [@yang2017joint] without adjusting for spatial dependence. The implementation of JQR is hided. 
+
+The check losses are presented in the figure below. JSQR-GP and JSQR-TP provide similar prediction performances which are clearly superior than that given by JQR.
+
+```{r, message=FALSE, echo=FALSE, results=FALSE}
+library(qrjoint)
+jqr.fit <- qrjoint(formula = pm ~ LCYPOP00 + LDISTA1 + NLCD_URB + LS25_E10 + ELEV_NED, 
+                       data = pm[train.ix,], nsamp = 2e2, thin = 10, fbase = 'logistic')
+
+coef.jqr <- coef(jqr.fit, plot = FALSE, nmc = 500)
+coef.jqr.mean <- apply(coef.jqr$beta.samp[as.integer(tau.grid/0.01)+1,,], c(1,2), mean)
+  
+qt.pred <- apply(coef.jqr.mean, 1, function(u) as.matrix(cbind(1,x.test))%*%u)
+jqr.test.err <- apply(qt.pred, 2, function(u) y.test - u)
+jqr.test.loss <- matrix(NA, n.test, length(tau.grid))
+ 
+for(i in 1:length(tau.grid)){jqr.test.loss[,i] <- check.loss(jqr.test.err[,i], tau.grid[i])}
+```
+
+```{r}
+# plot check losses of predicted conditional quantiles given by three models
+plot(tau.grid, apply(jqr.test.loss,2,mean), type = 'o', pch = 3, col = 3,
+     xlab = expression(tau), ylab = 'Check loss', ylim = c(0,1))
+points(tau.grid, apply(jsqrgp.test.loss,2,mean), type = 'o', pch = 1)
+points(tau.grid, apply(jsqrtp.test.loss,2,mean), type = 'o', pch = 2, col = 2)
+
+# add legend
+legend(x = 0.33, y = 0.3, legend = c('JSQR-GP', 'JSQR-TP', "JQR"), lty = 1, 
+       pch=c(1,2,3), col=c(1,2,3), bty = 'n')
+```
+
+# References

@@ -1,0 +1,3 @@
+jqr_pred_ind.R       - Prediction of conditional quantiles with JQR under independent scenario (Figure 4, panel 1)
+jsqrgp_pred_ind.R    - Prediction of conditional quantiles with JSQR-GP under independent scenario (Figure 4, panel 1)
+jsqrtp_pred_ind.R    - Prediction of conditional quantiles with JSQR-TP under independent scenario (Figure 4, panel 1)

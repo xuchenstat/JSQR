@@ -1,0 +1,13 @@
+Ex1_ald_GP.R       - ALDQR model fitting for Ex.1 with GP in Section 5.1
+Ex1_alp_GP.R       - ALPQR model fitting for Ex.1 with GP in Section 5.1
+Ex1_jqr_GP.R       - JQR model fitting for Ex.1 with GP in Section 5.1
+Ex1_jsqr_GP.R      - JSQR model fitting for Ex.1 with GP in Section 5.1
+Ex1_kb_GP.R        - KB model fitting for Ex.1 with GP in Section 5.1
+
+Ex1_summary_GP.R   - Summary of simulation results presented in Figure 1 bottom row.
+
+Ex1_pred_ald.R     - Prediction given by ALDQR for Ex.1 with GP in Section 5.1
+Ex1_pred_alp.R     - Prediction given by ALPQR for Ex.1 with GP in Section 5.1
+Ex1_pred_jqr.R     - Prediction given by JQR for Ex.1 with GP in Section 5.1
+Ex1_pred_jsqr.R    - Prediction given by JSQR for Ex.1 with GP in Section 5.1
+Ex1_pred_kb.R      - Prediction given by KB for Ex.1 with GP in Section 5.1

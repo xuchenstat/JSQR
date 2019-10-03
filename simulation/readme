@@ -1,0 +1,6 @@
+This folder contains files for conducting all simulation studies in the paper.
+
+Ex1, Ex2: Simulation study in Section 5.1
+adaptive: Simulation study in Section 5.2
+waic:     Simulation study in Section 6.3
+real:     Simulation study in Section 7

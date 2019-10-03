@@ -1,0 +1,3 @@
+jqr_tp.R       - JQR model fit under scenario where true generating process is TP
+jsqrgp_tp.R    - JSQR-GP model fit under scenario where true generating process is TP
+jsqrtp_tp.R    - JSQR-TP model fit under scenario where true generating process is TP

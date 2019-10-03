@@ -1,0 +1,7 @@
+Ex2_ald_ALP.R       - ALDQR model fitting for Ex.2 with ALP in Section 5.1
+Ex2_alp_ALP.R       - ALPQR model fitting for Ex.2 with ALP in Section 5.1
+Ex2_jqr_ALP.R       - JQR model fitting for Ex.2 with ALP in Section 5.1
+Ex2_jsqr_ALP.R      - JSQR model fitting for Ex.2 with ALP in Section 5.1
+Ex2_kb_ALP.R        - KB model fitting for Ex.2 with ALP in Section 5.1
+Ex2_summary_ALP.R   - Summary of simulation results presented in Figure 2.
+
